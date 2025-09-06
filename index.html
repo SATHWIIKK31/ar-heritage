@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>AR Heritage Demo</title>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.7.7/aframe/build/aframe-ar.js"></script>
+    <style>
+      body, html { margin: 0; overflow: hidden; font-family: Arial, sans-serif; }
+      .menu {
+        position: fixed;
+        bottom: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255,255,255,0.9);
+        padding: 12px;
+        border-radius: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+      }
+      .menu button {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        background: #1976d2;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .menu button:hover { background: #0d47a1; }
+      .scale-controls {
+        width: 100%;
+        text-align: center;
+        margin-top: 8px;
+      }
+      .scale-display {
+        font-size: 14px;
+        font-weight: bold;
+        margin: 0 10px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+      
+      <!-- Marker -->
+      <a-marker preset="hiro">
+        <a-entity id="model" 
+                  gltf-model="url(assets/models/taj_mahal.glb)" 
+                  scale="4 4 4" 
+                  position="0 0 0">
+        </a-entity>
+      </a-marker>
+
+      <!-- Camera -->
+      <a-entity camera></a-entity>
+    </a-scene>
+
+    <!-- Menu -->
+    <div class="menu">
+      <!-- Monument buttons -->
+      <button onclick="loadModel('taj_mahal.glb')">Taj Mahal</button>
+      <button onclick="loadModel('charminar.glb')">Charminar</button>
+      <button onclick="loadModel('india_gate.glb')">India Gate</button>
+      <button onclick="loadModel('ellora_caves.glb')">Ellora Caves</button>
+      <button onclick="loadModel('red_fort.glb')">Red Fort</button>
+      
+      <!-- Scale controls -->
+      <div class="scale-controls">
+        <button onclick="adjustScale(0.5)">-</button>
+        <span class="scale-display" id="scaleValue">Scale: 4</span>
+        <button onclick="adjustScale(2)">+</button>
+      </div>
+    </div>
+
+    <script>
+      let currentScale = 4; // default scale
+
+      function loadModel(file) {
+        const model = document.querySelector('#model');
+        model.setAttribute('gltf-model', 'url(assets/models/' + file + ')');
+        model.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+      }
+
+      function adjustScale(factor) {
+        currentScale = Math.max(0.5, currentScale + factor); // prevent scale from going below 0.5
+        const model = document.querySelector('#model');
+        model.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+        document.getElementById('scaleValue').innerText = "Scale: " + currentScale.toFixed(1);
+      }
+    </script>
+  </body>
+</html>
