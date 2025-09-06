@@ -2,9 +2,8 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>AR Heritage Demo</title>
-  <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-  <script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.7.7/aframe/build/aframe-ar.js"></script>
+  <title>AR Heritage Demo (Browser 3D)</title>
+  <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
   <style>
     body, html { margin:0; overflow:hidden; font-family: Arial; }
     .menu {
@@ -24,52 +23,75 @@
     .scale-display { font-size: 14px; font-weight: bold; margin: 0 10px; }
   </style>
 </head>
-
 <body>
-  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-    <a-marker preset="hiro">
-      <a-entity id="model"
-                gltf-model="url(assets/models/taj_mahal.glb)"
-                scale="4 4 4"
-                position="0 0 0">
-      </a-entity>
-    </a-marker>
-    <a-entity camera></a-entity>
+
+  <a-scene embedded background="color: #ECECEC">
+    <a-entity id="cameraRig">
+      <a-camera position="0 1.6 3" look-controls wasd-controls></a-camera>
+    </a-entity>
+
+    <a-entity id="model" gltf-model="url(assets/models/taj_mahal.glb)"
+              scale="1 1 1" position="0 0 0"
+              rotation="0 0 0"
+              animation-mixer
+              drag-rotate
+    ></a-entity>
   </a-scene>
 
   <div class="menu">
+    <!-- Monument Buttons -->
     <button onclick="loadModel('taj_mahal.glb')">Taj Mahal</button>
     <button onclick="loadModel('charminar.glb')">Charminar</button>
     <button onclick="loadModel('india_gate.glb')">India Gate</button>
     <button onclick="loadModel('ellora_caves.glb')">Ellora Caves</button>
     <button onclick="loadModel('red_fort.glb')">Red Fort</button>
+    <!-- Scale Buttons -->
     <button onclick="scaleDown()">-</button>
-    <span class="scale-display" id="scaleValue">Scale: 4</span>
+    <span class="scale-display" id="scaleValue">Scale: 1</span>
     <button onclick="scaleUp()">+</button>
   </div>
 
   <script>
-    let currentScale = 4;
+    let model = document.getElementById('model');
+    let currentScale = 1;
+    let currentModel = "taj_mahal.glb";
 
     function loadModel(file) {
-      const model = document.querySelector('#model');
+      currentModel = file;
       model.setAttribute('gltf-model', 'url(assets/models/' + file + ')');
-      model.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+      currentScale = 1;
+      model.setAttribute('scale', {x: currentScale, y: currentScale, z: currentScale});
+      document.getElementById('scaleValue').innerText = "Scale: " + currentScale;
     }
 
     function scaleUp() {
       currentScale = +(currentScale * 1.2).toFixed(1);
-      const model = document.querySelector('#model');
-      model.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+      model.setAttribute('scale', {x: currentScale, y: currentScale, z: currentScale});
       document.getElementById('scaleValue').innerText = "Scale: " + currentScale;
     }
 
     function scaleDown() {
       currentScale = +(currentScale * 0.8).toFixed(1);
-      const model = document.querySelector('#model');
-      model.setAttribute('scale', `${currentScale} ${currentScale} ${currentScale}`);
+      model.setAttribute('scale', {x: currentScale, y: currentScale, z: currentScale});
       document.getElementById('scaleValue').innerText = "Scale: " + currentScale;
     }
+
+    // Simple drag rotate
+    AFRAME.registerComponent('drag-rotate', {
+      init: function () {
+        this.isDragging = false;
+        this.previousX = 0;
+        this.el.addEventListener('mousedown', (e)=>{ this.isDragging = true; this.previousX = e.clientX; });
+        window.addEventListener('mouseup', ()=>{ this.isDragging = false; });
+        window.addEventListener('mousemove', (e)=>{
+          if(!this.isDragging) return;
+          let rotation = this.el.getAttribute('rotation');
+          rotation.y += (e.clientX - this.previousX) * 0.5;
+          this.el.setAttribute('rotation', rotation);
+          this.previousX = e.clientX;
+        });
+      }
+    });
   </script>
 </body>
 </html>
